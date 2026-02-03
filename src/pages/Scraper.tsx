@@ -174,21 +174,28 @@ export default function Scraper() {
         }
       }
     } catch (err: any) {
+      const currentProgress = scrapingProgress?.current || 0
+
       if (err.name === 'AbortError') {
-        // User cancelled - show partial results if any
+        // User cancelled - show what we got so far
         setResult({
-          platform: 'eBay (Cancelled)',
-          count: scrapingProgress?.current || 0,
+          platform: 'eBay (Stopped)',
+          count: currentProgress,
           titles: [],
-          error: `Scraping stopped at ${scrapingProgress?.current || 0} products`
+          error: `⚠️ Scraping stopped manually at ${currentProgress} products. Results not saved.`
         })
       } else {
+        // Connection error or timeout
         console.error('eBay scraping error:', err)
+        const errorMessage = err.message?.includes('Failed to fetch') || err.message?.includes('Load failed')
+          ? `❌ Connection lost after ${currentProgress} products. This can happen with slow connections or large stores. Try refreshing the page and scraping again.`
+          : err.message || 'Unknown error occurred'
+
         setResult({
-          platform: 'eBay',
-          count: 0,
+          platform: 'eBay (Error)',
+          count: currentProgress,
           titles: [],
-          error: err instanceof Error ? err.message : 'Scraping failed'
+          error: errorMessage
         })
       }
       setScrapingProgress(null)
@@ -201,6 +208,7 @@ export default function Scraper() {
   function handleStopScraping() {
     if (abortController) {
       abortController.abort()
+      setScrapingProgress(null)
     }
   }
 
@@ -521,62 +529,65 @@ export default function Scraper() {
                   </div>
 
                   {/* Progress Display */}
-                  {scrapingProgress && (
-                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">
-                          {scrapingProgress.status === 'Started' ? 'Analyzing store...' : 'Scraping products...'}
-                        </span>
-                        <span className="text-sm font-bold text-primary">
-                          {scrapingProgress.current}
-                          {scrapingProgress.totalEstimate && `/${scrapingProgress.totalEstimate.toLocaleString()}`}
+                  {(scrapingProgress || isScrapingEbay) && (
+                    <div className="p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg border-2 border-primary/40 shadow-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                          <span className="text-sm font-semibold">
+                            {scrapingProgress?.status === 'Started' ? 'Analyzing store...' :
+                             scrapingProgress ? 'Scraping products...' : 'Connecting...'}
+                          </span>
+                        </div>
+                        <span className="text-lg font-bold text-primary">
+                          {scrapingProgress?.current || 0}
+                          {scrapingProgress?.totalEstimate && (
+                            <span className="text-muted-foreground">
+                              /{scrapingProgress.totalEstimate.toLocaleString()}
+                            </span>
+                          )}
                         </span>
                       </div>
-                      {scrapingProgress.totalEstimate && (
-                        <div className="w-full bg-muted rounded-full h-2 mb-2">
+                      {scrapingProgress?.totalEstimate && scrapingProgress.current > 0 && (
+                        <div className="w-full bg-muted rounded-full h-3 mb-3 overflow-hidden">
                           <div
-                            className="bg-primary h-2 rounded-full transition-all duration-300"
+                            className="bg-gradient-to-r from-primary to-primary/70 h-3 rounded-full transition-all duration-500 animate-pulse"
                             style={{
                               width: `${Math.min((scrapingProgress.current / scrapingProgress.totalEstimate) * 100, 100)}%`
                             }}
                           />
                         </div>
                       )}
-                      <p className="text-xs text-muted-foreground">
-                        Store: {scrapingProgress.storeName}
-                      </p>
+                      {scrapingProgress?.storeName && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          📦 Store: {scrapingProgress.storeName}
+                        </p>
+                      )}
+                      {/* Large Stop Button */}
+                      <Button
+                        variant="destructive"
+                        size="lg"
+                        className="w-full font-bold shadow-lg hover:shadow-xl transition-all"
+                        onClick={handleStopScraping}
+                      >
+                        🛑 Stop Scraping
+                      </Button>
                     </div>
                   )}
 
                   {/* Buttons */}
-                  <div className="flex gap-2">
+                  {!isScrapingEbay && (
                     <Button
                       variant="hero"
-                      className="flex-1"
+                      size="lg"
+                      className="w-full"
                       onClick={handleScrapeEbay}
-                      disabled={!ebayUrl || isScrapingEbay}
+                      disabled={!ebayUrl}
                     >
-                      {isScrapingEbay ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Scraping...
-                        </>
-                      ) : (
-                        <>
-                          <Zap className="h-4 w-4 mr-2" />
-                          Start Scraping
-                        </>
-                      )}
+                      <Zap className="h-5 w-5 mr-2" />
+                      Start Scraping
                     </Button>
-                    {isScrapingEbay && (
-                      <Button
-                        variant="destructive"
-                        onClick={handleStopScraping}
-                      >
-                        Stop
-                      </Button>
-                    )}
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
