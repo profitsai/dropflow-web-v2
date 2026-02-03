@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info } from "lucide-react"
+import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info, DollarSign, ShoppingCart, CheckCircle2, Box } from "lucide-react"
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-production.up.railway.app';
 
@@ -35,6 +35,21 @@ export default function Scraper() {
     minStarRating: '4',
     keywords: ''
   })
+
+  // Credit purchase state
+  const [creditAmount, setCreditAmount] = useState(1000)
+
+  // Calculate price per credit based on tier
+  function getPricePerCredit(amount: number): number {
+    if (amount <= 1000) return 0.10
+    if (amount <= 3000) return 0.08
+    if (amount <= 10000) return 0.07
+    return 0.05
+  }
+
+  function getTotalPrice(): number {
+    return Math.round(creditAmount * getPricePerCredit(creditAmount) * 100) / 100
+  }
 
   function handleEbayUrlChange(url: string) {
     setEbayUrl(url)
@@ -528,68 +543,224 @@ export default function Scraper() {
             </Card>
           )}
 
-          {/* Info Cards */}
-          <div className="grid md:grid-cols-3 gap-6">
+          {/* What It Does & Why It's Useful */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Package className="h-5 w-5 text-primary" />
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Box className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-bold text-lg">What It Does</h3>
+                  <h3 className="font-bold text-xl">What It Does</h3>
                 </div>
-                <p className="text-muted-foreground">
-                  Paste a competitor's eBay store URL and select their supplier platform. DropFlow will
-                  automatically scrape their entire catalog and find the source products for you.
-                </p>
+                <div className="space-y-3 text-muted-foreground">
+                  <p>
+                    Simply paste any eBay or Amazon store URL, and our intelligent bot will automatically
+                    scrape every single product from that store.
+                  </p>
+                  <p>
+                    You'll receive a comprehensive list of product links that can be directly uploaded to
+                    our Import section for quick filtering and cataloging.
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="h-5 w-5 text-primary" />
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="h-6 w-6 text-primary" />
                   </div>
-                  <h3 className="font-bold text-lg">Why It's Useful</h3>
+                  <h3 className="font-bold text-xl">Why It's Useful</h3>
                 </div>
-                <p className="text-muted-foreground">
-                  <span className="font-semibold text-foreground">Save countless hours</span> —
-                  No more manually finding source products. Clone successful competitors' catalogs
-                  and import winning products to your store instantly.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Zap className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-bold text-lg">How To Use</h3>
-                </div>
-                <div className="text-sm text-muted-foreground space-y-2">
-                  <div className="flex gap-2">
-                    <span className="font-bold text-primary">1.</span>
-                    <span>Find a successful eBay dropshipper</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="font-bold text-primary">2.</span>
-                    <span>Paste their eBay store URL</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="font-bold text-primary">3.</span>
-                    <span>Select their supplier (Amazon/AliExpress)</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="font-bold text-primary">4.</span>
-                    <span>DropFlow finds all source products</span>
-                  </div>
+                <div className="space-y-3 text-muted-foreground">
+                  <p>
+                    <span className="font-semibold text-foreground">Save countless hours</span> - No more
+                    manually copying product links one by one
+                  </p>
+                  <p>
+                    <span className="font-semibold text-foreground">Scale rapidly</span> - Build a catalog
+                    of thousands of products in minutes instead of weeks
+                  </p>
+                  <p>
+                    <span className="font-semibold text-foreground">Stay competitive</span> - Quickly
+                    replicate successful stores and get to market faster
+                  </p>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* How It Works */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>How It Works</CardTitle>
+                  <CardDescription>Three simple steps to scale your product catalog</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-8">
+                <div>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-primary">1</span>
+                  </div>
+                  <h4 className="font-bold text-lg mb-2">Enter Store URL</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Paste the eBay or Amazon store URL you want to scrape
+                  </p>
+                </div>
+                <div>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-primary">2</span>
+                  </div>
+                  <h4 className="font-bold text-lg mb-2">Bot Scrapes Products</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Our bot automatically extracts all product links from the store
+                  </p>
+                </div>
+                <div>
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    <span className="text-2xl font-bold text-primary">3</span>
+                  </div>
+                  <h4 className="font-bold text-lg mb-2">Import & Filter</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Upload the list to Import section and apply your filter requirements
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Buy Credits */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>Buy Credits</CardTitle>
+                  <CardDescription>1 credit = 1 product scraped</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Credit Amount Input */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="creditAmount" className="text-base font-medium">
+                    Number of Credits
+                  </Label>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold text-primary">
+                      ${getTotalPrice().toFixed(2)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      ({creditAmount.toLocaleString()} products)
+                    </div>
+                  </div>
+                </div>
+                <Input
+                  id="creditAmount"
+                  type="number"
+                  min="1"
+                  max="50000"
+                  step="100"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(Math.max(1, Math.min(50000, parseInt(e.target.value) || 1)))}
+                  className="text-lg font-semibold"
+                />
+              </div>
+
+              {/* Slider */}
+              <div className="space-y-2">
+                <input
+                  type="range"
+                  min="1"
+                  max="15000"
+                  step="100"
+                  value={creditAmount}
+                  onChange={(e) => setCreditAmount(parseInt(e.target.value))}
+                  className="w-full h-2 bg-gradient-to-r from-primary/30 to-primary rounded-lg appearance-none cursor-pointer
+                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>1</span>
+                  <span>15,000+</span>
+                </div>
+              </div>
+
+              {/* Pricing Tiers Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className={`p-3 rounded-lg border-2 transition-all ${
+                  creditAmount <= 1000
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-muted/30'
+                }`}>
+                  <div className="text-xs text-muted-foreground mb-1">1-1,000</div>
+                  <div className="text-lg font-bold">$0.10</div>
+                  <div className="text-xs text-muted-foreground">per credit</div>
+                </div>
+                <div className={`p-3 rounded-lg border-2 transition-all ${
+                  creditAmount > 1000 && creditAmount <= 3000
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-muted/30'
+                }`}>
+                  <div className="text-xs text-muted-foreground mb-1">1,001-3,000</div>
+                  <div className="text-lg font-bold">$0.08</div>
+                  <div className="text-xs text-muted-foreground">per credit</div>
+                </div>
+                <div className={`p-3 rounded-lg border-2 transition-all ${
+                  creditAmount > 3000 && creditAmount <= 10000
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-muted/30'
+                }`}>
+                  <div className="text-xs text-muted-foreground mb-1">3,001-10,000</div>
+                  <div className="text-lg font-bold">$0.07</div>
+                  <div className="text-xs text-muted-foreground">per credit</div>
+                </div>
+                <div className={`p-3 rounded-lg border-2 transition-all ${
+                  creditAmount > 10000
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-muted/30'
+                }`}>
+                  <div className="text-xs text-muted-foreground mb-1">10,000+</div>
+                  <div className="text-lg font-bold">$0.05</div>
+                  <div className="text-xs text-muted-foreground">per credit</div>
+                </div>
+              </div>
+
+              {/* Purchase Button */}
+              <Button variant="hero" size="lg" className="w-full text-lg">
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Purchase {creditAmount.toLocaleString()} Credits for ${getTotalPrice().toFixed(2)}
+              </Button>
+
+              {/* Instructions */}
+              <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
+                <p className="mb-2">
+                  Once scraping is complete, you'll receive a downloadable file with all product links.
+                </p>
+                <p>
+                  Take this file to the{" "}
+                  <a href="/import" className="text-primary hover:underline font-medium">
+                    Import section
+                  </a>{" "}
+                  to filter and add products to your catalog based on your requirements.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>
