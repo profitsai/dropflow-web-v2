@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info, DollarSign, ShoppingCart, CheckCircle2, Box } from "lucide-react"
+import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info, ShoppingCart, CheckCircle2, Box } from "lucide-react"
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-production.up.railway.app';
 
@@ -36,19 +36,21 @@ export default function Scraper() {
     keywords: ''
   })
 
-  // Credit purchase state
-  const [creditAmount, setCreditAmount] = useState(1000)
+  // Credit purchase state with fixed bundles
+  const creditBundles = [
+    { credits: 250, price: 25, pricePerCredit: 0.10, popular: false },
+    { credits: 1000, price: 90, pricePerCredit: 0.09, popular: false },
+    { credits: 2500, price: 200, pricePerCredit: 0.08, popular: true },
+    { credits: 5000, price: 369, pricePerCredit: 0.0738, popular: false },
+    { credits: 10000, price: 500, pricePerCredit: 0.05, popular: false },
+  ]
 
-  // Calculate price per credit based on tier
-  function getPricePerCredit(amount: number): number {
-    if (amount <= 1000) return 0.10
-    if (amount <= 3000) return 0.08
-    if (amount <= 10000) return 0.07
-    return 0.05
-  }
+  const [selectedBundle, setSelectedBundle] = useState(creditBundles[1]) // Default to 1000 credits
 
-  function getTotalPrice(): number {
-    return Math.round(creditAmount * getPricePerCredit(creditAmount) * 100) / 100
+  function getSavingsPercent(bundle: typeof creditBundles[0]): number {
+    const basePricePerCredit = 0.10
+    const savings = ((basePricePerCredit - bundle.pricePerCredit) / basePricePerCredit) * 100
+    return Math.round(savings)
   }
 
   function handleEbayUrlChange(url: string) {
@@ -652,141 +654,107 @@ export default function Scraper() {
             <div className="bg-gradient-to-r from-green-500/10 via-primary/10 to-blue-500/10 p-6 border-b-2">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
-                  <DollarSign className="h-6 w-6 text-white" />
+                  <ShoppingCart className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle className="text-2xl">Buy Credits</CardTitle>
-                  <CardDescription className="text-base">1 credit = 1 product scraped · $0.10 per credit</CardDescription>
+                  <CardTitle className="text-2xl">Buy More Credits</CardTitle>
+                  <CardDescription className="text-base">1 credit = 1 product scraped</CardDescription>
                 </div>
               </div>
             </div>
-            <CardContent className="pt-8 pb-8 space-y-8">
-              {/* Credit Amount Input */}
-              <div className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <Label htmlFor="creditAmount" className="text-lg font-semibold mb-1 block">
-                      Number of Credits
-                    </Label>
-                    <p className="text-sm text-muted-foreground">Select amount or enter manually</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-5xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                      ${getTotalPrice().toFixed(2)}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Total Price ({creditAmount.toLocaleString()} products)
-                    </div>
-                  </div>
+            <CardContent className="pt-8 pb-8 space-y-6">
+              {/* Current Price Display */}
+              <div className="text-center pb-6 border-b">
+                <div className="text-6xl font-bold bg-gradient-to-r from-green-500 via-primary to-blue-600 bg-clip-text text-transparent mb-2">
+                  ${selectedBundle.price}
                 </div>
-                <Input
-                  id="creditAmount"
-                  type="number"
-                  min="1"
-                  max="50000"
-                  step="100"
-                  value={creditAmount}
-                  onChange={(e) => setCreditAmount(Math.max(1, Math.min(50000, parseInt(e.target.value) || 1)))}
-                  className="text-xl font-semibold h-14 border-2 focus:ring-2 focus:ring-primary/20"
-                />
+                <p className="text-muted-foreground">
+                  {selectedBundle.credits.toLocaleString()} Credits • ${selectedBundle.pricePerCredit.toFixed(selectedBundle.pricePerCredit >= 0.1 ? 2 : 4)}/credit
+                </p>
               </div>
 
-              {/* Slider */}
-              <div className="space-y-3 px-1">
-                <div className="relative">
-                  <input
-                    type="range"
-                    min="1"
-                    max="15000"
-                    step="100"
-                    value={creditAmount}
-                    onChange={(e) => setCreditAmount(parseInt(e.target.value))}
-                    className="w-full h-3 bg-gradient-to-r from-blue-500 via-primary to-green-500 rounded-full appearance-none cursor-pointer
-                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
-                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer
-                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-primary
-                      [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full
-                      [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-4 [&::-moz-range-thumb]:border-primary
-                      [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
-                  />
-                </div>
-                <div className="flex justify-between text-sm font-medium text-muted-foreground px-1">
-                  <span>1 credit</span>
-                  <span>15,000+ credits</span>
-                </div>
+              {/* Bundle Selection */}
+              <div className="space-y-3">
+                {creditBundles.map((bundle) => {
+                  const isSelected = selectedBundle.credits === bundle.credits
+                  const savings = getSavingsPercent(bundle)
+
+                  return (
+                    <button
+                      key={bundle.credits}
+                      onClick={() => setSelectedBundle(bundle)}
+                      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all duration-200 ${
+                        isSelected
+                          ? 'border-primary bg-primary/5 shadow-lg shadow-primary/20'
+                          : 'border-border hover:border-primary/50 bg-card'
+                      }`}
+                    >
+                      {/* Radio Button */}
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                        isSelected ? 'border-primary' : 'border-muted-foreground'
+                      }`}>
+                        {isSelected && (
+                          <div className="w-3 h-3 rounded-full bg-primary"></div>
+                        )}
+                      </div>
+
+                      {/* Bundle Info */}
+                      <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-lg">
+                            {bundle.credits.toLocaleString()} Credits
+                          </span>
+                          {bundle.popular && (
+                            <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold rounded-full">
+                              Most Popular
+                            </span>
+                          )}
+                          {savings > 0 && !bundle.popular && (
+                            <span className="text-xs font-semibold text-green-600 dark:text-green-400">
+                              Save {savings}%
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="text-right">
+                        <div className="font-bold text-xl">${bundle.price}</div>
+                        <div className="text-xs text-muted-foreground">
+                          ${bundle.pricePerCredit.toFixed(bundle.pricePerCredit >= 0.1 ? 2 : 4)}/credit
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
               </div>
 
-              {/* Pricing Tiers Info */}
-              <div>
-                <h4 className="font-semibold text-lg mb-4">Volume Pricing Tiers</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
-                    creditAmount <= 1000
-                      ? 'border-blue-500 bg-gradient-to-br from-blue-500/10 to-blue-600/5 shadow-lg shadow-blue-500/20'
-                      : 'border-border bg-muted/30 hover:border-primary/30'
-                  }`}>
-                    {creditAmount <= 1000 && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                        <CheckCircle2 className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <div className="text-xs font-semibold text-muted-foreground mb-2">1-1,000</div>
-                    <div className="text-3xl font-bold mb-1">$0.10</div>
-                    <div className="text-xs text-muted-foreground">per credit</div>
-                  </div>
-                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
-                    creditAmount > 1000 && creditAmount <= 3000
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/20'
-                      : 'border-border bg-muted/30 hover:border-primary/30'
-                  }`}>
-                    {creditAmount > 1000 && creditAmount <= 3000 && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                        <CheckCircle2 className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <div className="text-xs font-semibold text-orange-500 mb-1">SAVE 20%</div>
-                    <div className="text-xs font-semibold text-muted-foreground mb-2">1,001-3,000</div>
-                    <div className="text-3xl font-bold mb-1">$0.08</div>
-                    <div className="text-xs text-muted-foreground">per credit</div>
-                  </div>
-                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
-                    creditAmount > 3000 && creditAmount <= 10000
-                      ? 'border-purple-500 bg-gradient-to-br from-purple-500/10 to-purple-600/5 shadow-lg shadow-purple-500/20'
-                      : 'border-border bg-muted/30 hover:border-primary/30'
-                  }`}>
-                    {creditAmount > 3000 && creditAmount <= 10000 && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
-                        <CheckCircle2 className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <div className="text-xs font-semibold text-orange-500 mb-1">SAVE 30%</div>
-                    <div className="text-xs font-semibold text-muted-foreground mb-2">3,001-10,000</div>
-                    <div className="text-3xl font-bold mb-1">$0.07</div>
-                    <div className="text-xs text-muted-foreground">per credit</div>
-                  </div>
-                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
-                    creditAmount > 10000
-                      ? 'border-green-500 bg-gradient-to-br from-green-500/10 to-green-600/5 shadow-lg shadow-green-500/20'
-                      : 'border-border bg-muted/30 hover:border-primary/30'
-                  }`}>
-                    {creditAmount > 10000 && (
-                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                        <CheckCircle2 className="h-5 w-5 text-white" />
-                      </div>
-                    )}
-                    <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">BEST VALUE 50%</div>
-                    <div className="text-xs font-semibold text-muted-foreground mb-2">10,000+</div>
-                    <div className="text-3xl font-bold mb-1">$0.05</div>
-                    <div className="text-xs text-muted-foreground">per credit</div>
-                  </div>
-                </div>
+              {/* Coupon Link */}
+              <div className="text-center">
+                <button className="text-primary hover:underline font-medium text-sm">
+                  I have a coupon!
+                </button>
               </div>
 
               {/* Purchase Button */}
-              <Button variant="hero" size="lg" className="w-full text-lg h-16 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
-                <ShoppingCart className="h-6 w-6 mr-3" />
-                Purchase {creditAmount.toLocaleString()} Credits for ${getTotalPrice().toFixed(2)}
+              <Button
+                variant="hero"
+                size="lg"
+                className="w-full text-lg h-16 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-green-500 via-primary to-blue-600 hover:from-green-600 hover:via-primary/90 hover:to-blue-700"
+              >
+                Buy Now - ${selectedBundle.price}
               </Button>
+
+              {/* Terms */}
+              <div className="text-center text-xs text-muted-foreground space-x-2">
+                <a href="/terms" className="text-primary hover:underline font-medium">
+                  Terms & Conditions
+                </a>
+                <span>and</span>
+                <a href="/privacy" className="text-primary hover:underline font-medium">
+                  Privacy Policy
+                </a>
+              </div>
 
               {/* Instructions */}
               <div className="bg-gradient-to-r from-blue-500/5 via-primary/5 to-green-500/5 border-2 border-primary/20 p-5 rounded-xl">
