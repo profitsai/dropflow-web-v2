@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Navbar } from "@/components/Navbar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -593,77 +593,89 @@ export default function Scraper() {
           </div>
 
           {/* How It Works */}
-          <Card className="mb-8">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
+          <Card className="mb-8 border-2 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6 border-b">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
+                  <CheckCircle2 className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle>How It Works</CardTitle>
-                  <CardDescription>Three simple steps to scale your product catalog</CardDescription>
+                  <CardTitle className="text-2xl">How It Works</CardTitle>
+                  <CardDescription className="text-base">Three simple steps to scale your product catalog</CardDescription>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <CardContent className="pt-8 pb-8">
               <div className="grid md:grid-cols-3 gap-8">
-                <div>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-primary">1</span>
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative p-6 bg-card rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
+                      <span className="text-3xl font-bold text-white">1</span>
+                    </div>
+                    <h4 className="font-bold text-xl mb-3">Enter Store URL</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Paste the eBay or Amazon store URL you want to scrape
+                    </p>
                   </div>
-                  <h4 className="font-bold text-lg mb-2">Enter Store URL</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Paste the eBay or Amazon store URL you want to scrape
-                  </p>
                 </div>
-                <div>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-primary">2</span>
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative p-6 bg-card rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
+                      <span className="text-3xl font-bold text-white">2</span>
+                    </div>
+                    <h4 className="font-bold text-xl mb-3">Bot Scrapes Products</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Our bot automatically extracts all product links from the store
+                    </p>
                   </div>
-                  <h4 className="font-bold text-lg mb-2">Bot Scrapes Products</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Our bot automatically extracts all product links from the store
-                  </p>
                 </div>
-                <div>
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <span className="text-2xl font-bold text-primary">3</span>
+                <div className="relative group">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-green-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative p-6 bg-card rounded-xl border-2 border-border hover:border-primary/50 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 shadow-lg shadow-green-500/30">
+                      <span className="text-3xl font-bold text-white">3</span>
+                    </div>
+                    <h4 className="font-bold text-xl mb-3">Import & Filter</h4>
+                    <p className="text-muted-foreground leading-relaxed">
+                      Upload the list to Import section and apply your filter requirements
+                    </p>
                   </div>
-                  <h4 className="font-bold text-lg mb-2">Import & Filter</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Upload the list to Import section and apply your filter requirements
-                  </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Buy Credits */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-primary" />
+          <Card className="border-2 overflow-hidden">
+            <div className="bg-gradient-to-r from-green-500/10 via-primary/10 to-blue-500/10 p-6 border-b-2">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+                  <DollarSign className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <CardTitle>Buy Credits</CardTitle>
-                  <CardDescription>1 credit = 1 product scraped</CardDescription>
+                  <CardTitle className="text-2xl">Buy Credits</CardTitle>
+                  <CardDescription className="text-base">1 credit = 1 product scraped · $0.10 per credit</CardDescription>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
+            </div>
+            <CardContent className="pt-8 pb-8 space-y-8">
               {/* Credit Amount Input */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="creditAmount" className="text-base font-medium">
-                    Number of Credits
-                  </Label>
+              <div className="space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <Label htmlFor="creditAmount" className="text-lg font-semibold mb-1 block">
+                      Number of Credits
+                    </Label>
+                    <p className="text-sm text-muted-foreground">Select amount or enter manually</p>
+                  </div>
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-primary">
+                    <div className="text-5xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                       ${getTotalPrice().toFixed(2)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      ({creditAmount.toLocaleString()} products)
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Total Price ({creditAmount.toLocaleString()} products)
                     </div>
                   </div>
                 </div>
@@ -675,89 +687,127 @@ export default function Scraper() {
                   step="100"
                   value={creditAmount}
                   onChange={(e) => setCreditAmount(Math.max(1, Math.min(50000, parseInt(e.target.value) || 1)))}
-                  className="text-lg font-semibold"
+                  className="text-xl font-semibold h-14 border-2 focus:ring-2 focus:ring-primary/20"
                 />
               </div>
 
               {/* Slider */}
-              <div className="space-y-2">
-                <input
-                  type="range"
-                  min="1"
-                  max="15000"
-                  step="100"
-                  value={creditAmount}
-                  onChange={(e) => setCreditAmount(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gradient-to-r from-primary/30 to-primary rounded-lg appearance-none cursor-pointer
-                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer
-                    [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>1</span>
-                  <span>15,000+</span>
+              <div className="space-y-3 px-1">
+                <div className="relative">
+                  <input
+                    type="range"
+                    min="1"
+                    max="15000"
+                    step="100"
+                    value={creditAmount}
+                    onChange={(e) => setCreditAmount(parseInt(e.target.value))}
+                    className="w-full h-3 bg-gradient-to-r from-blue-500 via-primary to-green-500 rounded-full appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6
+                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:border-4 [&::-webkit-slider-thumb]:border-primary
+                      [&::-moz-range-thumb]:w-6 [&::-moz-range-thumb]:h-6 [&::-moz-range-thumb]:rounded-full
+                      [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-4 [&::-moz-range-thumb]:border-primary
+                      [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-lg"
+                  />
+                </div>
+                <div className="flex justify-between text-sm font-medium text-muted-foreground px-1">
+                  <span>1 credit</span>
+                  <span>15,000+ credits</span>
                 </div>
               </div>
 
               {/* Pricing Tiers Info */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className={`p-3 rounded-lg border-2 transition-all ${
-                  creditAmount <= 1000
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-muted/30'
-                }`}>
-                  <div className="text-xs text-muted-foreground mb-1">1-1,000</div>
-                  <div className="text-lg font-bold">$0.10</div>
-                  <div className="text-xs text-muted-foreground">per credit</div>
-                </div>
-                <div className={`p-3 rounded-lg border-2 transition-all ${
-                  creditAmount > 1000 && creditAmount <= 3000
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-muted/30'
-                }`}>
-                  <div className="text-xs text-muted-foreground mb-1">1,001-3,000</div>
-                  <div className="text-lg font-bold">$0.08</div>
-                  <div className="text-xs text-muted-foreground">per credit</div>
-                </div>
-                <div className={`p-3 rounded-lg border-2 transition-all ${
-                  creditAmount > 3000 && creditAmount <= 10000
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-muted/30'
-                }`}>
-                  <div className="text-xs text-muted-foreground mb-1">3,001-10,000</div>
-                  <div className="text-lg font-bold">$0.07</div>
-                  <div className="text-xs text-muted-foreground">per credit</div>
-                </div>
-                <div className={`p-3 rounded-lg border-2 transition-all ${
-                  creditAmount > 10000
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border bg-muted/30'
-                }`}>
-                  <div className="text-xs text-muted-foreground mb-1">10,000+</div>
-                  <div className="text-lg font-bold">$0.05</div>
-                  <div className="text-xs text-muted-foreground">per credit</div>
+              <div>
+                <h4 className="font-semibold text-lg mb-4">Volume Pricing Tiers</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
+                    creditAmount <= 1000
+                      ? 'border-blue-500 bg-gradient-to-br from-blue-500/10 to-blue-600/5 shadow-lg shadow-blue-500/20'
+                      : 'border-border bg-muted/30 hover:border-primary/30'
+                  }`}>
+                    {creditAmount <= 1000 && (
+                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+                        <CheckCircle2 className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div className="text-xs font-semibold text-muted-foreground mb-2">1-1,000</div>
+                    <div className="text-3xl font-bold mb-1">$0.10</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
+                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
+                    creditAmount > 1000 && creditAmount <= 3000
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg shadow-primary/20'
+                      : 'border-border bg-muted/30 hover:border-primary/30'
+                  }`}>
+                    {creditAmount > 1000 && creditAmount <= 3000 && (
+                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                        <CheckCircle2 className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div className="text-xs font-semibold text-orange-500 mb-1">SAVE 20%</div>
+                    <div className="text-xs font-semibold text-muted-foreground mb-2">1,001-3,000</div>
+                    <div className="text-3xl font-bold mb-1">$0.08</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
+                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
+                    creditAmount > 3000 && creditAmount <= 10000
+                      ? 'border-purple-500 bg-gradient-to-br from-purple-500/10 to-purple-600/5 shadow-lg shadow-purple-500/20'
+                      : 'border-border bg-muted/30 hover:border-primary/30'
+                  }`}>
+                    {creditAmount > 3000 && creditAmount <= 10000 && (
+                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                        <CheckCircle2 className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div className="text-xs font-semibold text-orange-500 mb-1">SAVE 30%</div>
+                    <div className="text-xs font-semibold text-muted-foreground mb-2">3,001-10,000</div>
+                    <div className="text-3xl font-bold mb-1">$0.07</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
+                  <div className={`relative p-5 rounded-xl border-2 transition-all duration-300 ${
+                    creditAmount > 10000
+                      ? 'border-green-500 bg-gradient-to-br from-green-500/10 to-green-600/5 shadow-lg shadow-green-500/20'
+                      : 'border-border bg-muted/30 hover:border-primary/30'
+                  }`}>
+                    {creditAmount > 10000 && (
+                      <div className="absolute -top-3 -right-3 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                        <CheckCircle2 className="h-5 w-5 text-white" />
+                      </div>
+                    )}
+                    <div className="text-xs font-semibold text-green-600 dark:text-green-400 mb-1">BEST VALUE 50%</div>
+                    <div className="text-xs font-semibold text-muted-foreground mb-2">10,000+</div>
+                    <div className="text-3xl font-bold mb-1">$0.05</div>
+                    <div className="text-xs text-muted-foreground">per credit</div>
+                  </div>
                 </div>
               </div>
 
               {/* Purchase Button */}
-              <Button variant="hero" size="lg" className="w-full text-lg">
-                <ShoppingCart className="h-5 w-5 mr-2" />
+              <Button variant="hero" size="lg" className="w-full text-lg h-16 shadow-xl hover:shadow-2xl transition-all duration-300 bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90">
+                <ShoppingCart className="h-6 w-6 mr-3" />
                 Purchase {creditAmount.toLocaleString()} Credits for ${getTotalPrice().toFixed(2)}
               </Button>
 
               {/* Instructions */}
-              <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-                <p className="mb-2">
-                  Once scraping is complete, you'll receive a downloadable file with all product links.
-                </p>
-                <p>
-                  Take this file to the{" "}
-                  <a href="/import" className="text-primary hover:underline font-medium">
-                    Import section
-                  </a>{" "}
-                  to filter and add products to your catalog based on your requirements.
-                </p>
+              <div className="bg-gradient-to-r from-blue-500/5 via-primary/5 to-green-500/5 border-2 border-primary/20 p-5 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Info className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-semibold mb-2 text-foreground">What happens next?</p>
+                    <p className="text-muted-foreground mb-2">
+                      Once scraping is complete, you'll receive a downloadable file with all product links.
+                    </p>
+                    <p className="text-muted-foreground">
+                      Take this file to the{" "}
+                      <a href="/import" className="text-primary hover:underline font-semibold">
+                        Import section
+                      </a>{" "}
+                      to filter and add products to your catalog based on your requirements.
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
