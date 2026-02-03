@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info, ShoppingCart, CheckCircle2, Box } from "lucide-react"
-import { scrapeEbayStore, matchTitlesToAmazon, importProduct } from "@/lib/api"
+import { matchTitlesToAmazon, importProduct } from "@/lib/api"
 
 export default function Scraper() {
   const [ebayUrl, setEbayUrl] = useState("")
@@ -29,6 +29,15 @@ export default function Scraper() {
     matchRate?: number;
     error?: string;
   } | null>(null)
+
+  // Streaming progress state
+  const [scrapingProgress, setScrapingProgress] = useState<{
+    totalEstimate: number | null;
+    current: number;
+    status: string;
+    storeName: string;
+  } | null>(null)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
   // Supplier selection dialog state
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
@@ -83,55 +92,115 @@ export default function Scraper() {
 
     setIsScrapingEbay(true)
     setResult(null)
+    setScrapingProgress(null)
+
+    const controller = new AbortController()
+    setAbortController(controller)
 
     try {
-      // Step 1: Scrape eBay store for product titles
-      const scrapeResponse = await scrapeEbayStore(ebayUrl, 50)
+      // Use streaming endpoint
+      const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-api-v2-production.up.railway.app'
+      const response = await fetch(`${API_URL}/api/scraper/ebay-store-stream`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ store_url: ebayUrl, max_pages: 50 }),
+        signal: controller.signal
+      })
 
-      if (!scrapeResponse.titles || scrapeResponse.titles.length === 0) {
+      if (!response.ok || !response.body) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let scrapedTitles: string[] = []
+
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = JSON.parse(line.slice(6))
+
+            if (data.status === 'started') {
+              setScrapingProgress({
+                totalEstimate: data.total_estimate,
+                current: 0,
+                status: 'Started',
+                storeName: data.store_name
+              })
+            } else if (data.status === 'scraping') {
+              setScrapingProgress(prev => ({
+                totalEstimate: prev?.totalEstimate || null,
+                current: data.progress,
+                status: 'Scraping',
+                storeName: prev?.storeName || ''
+              }))
+            } else if (data.done) {
+              scrapedTitles = data.titles || []
+              setScrapingProgress(null)
+
+              if (data.error) {
+                throw new Error(data.error)
+              }
+
+              // Step 2: Match to Amazon if selected
+              if (selectedSupplier === 'amazon' && scrapedTitles.length > 0) {
+                const matchResponse = await matchTitlesToAmazon(scrapedTitles, 'com')
+                const amazonUrls = matchResponse.results.filter(r => r.amazon_url).map(r => r.amazon_url!)
+
+                setResult({
+                  platform: `eBay → Amazon (${matchResponse.match_rate}% match rate)`,
+                  count: scrapedTitles.length,
+                  titles: scrapedTitles,
+                  matchedUrls: amazonUrls,
+                  matchRate: matchResponse.match_rate
+                })
+              } else {
+                setResult({
+                  platform: 'eBay → AliExpress',
+                  count: scrapedTitles.length,
+                  titles: scrapedTitles
+                })
+              }
+            }
+          }
+        }
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        // User cancelled - show partial results if any
+        setResult({
+          platform: 'eBay (Cancelled)',
+          count: scrapingProgress?.current || 0,
+          titles: [],
+          error: `Scraping stopped at ${scrapingProgress?.current || 0} products`
+        })
+      } else {
+        console.error('eBay scraping error:', err)
         setResult({
           platform: 'eBay',
           count: 0,
           titles: [],
-          error: 'No products found in store'
-        })
-        return
-      }
-
-      // Step 2: If Amazon supplier selected, match titles to Amazon products
-      if (selectedSupplier === 'amazon') {
-        const matchResponse = await matchTitlesToAmazon(scrapeResponse.titles, 'com')
-
-        // Extract Amazon URLs from successful matches
-        const amazonUrls = matchResponse.results
-          .filter(r => r.amazon_url)
-          .map(r => r.amazon_url!)
-
-        setResult({
-          platform: `eBay → Amazon (${matchResponse.match_rate}% match rate)`,
-          count: scrapeResponse.titles.length,
-          titles: scrapeResponse.titles,
-          matchedUrls: amazonUrls,
-          matchRate: matchResponse.match_rate
-        })
-      } else {
-        // AliExpress supplier - just show titles for now
-        setResult({
-          platform: 'eBay → AliExpress',
-          count: scrapeResponse.titles.length,
-          titles: scrapeResponse.titles
+          error: err instanceof Error ? err.message : 'Scraping failed'
         })
       }
-    } catch (err) {
-      console.error('eBay scraping error:', err)
-      setResult({
-        platform: 'eBay',
-        count: 0,
-        titles: [],
-        error: err instanceof Error ? err.message : 'Scraping failed'
-      })
+      setScrapingProgress(null)
     } finally {
       setIsScrapingEbay(false)
+      setAbortController(null)
+    }
+  }
+
+  function handleStopScraping() {
+    if (abortController) {
+      abortController.abort()
     }
   }
 
@@ -450,24 +519,64 @@ export default function Scraper() {
                       </div>
                     )}
                   </div>
-                  <Button
-                    variant="hero"
-                    className="w-full"
-                    onClick={handleScrapeEbay}
-                    disabled={!ebayUrl || isScrapingEbay}
-                  >
-                    {isScrapingEbay ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Scraping...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Start Scraping
-                      </>
+
+                  {/* Progress Display */}
+                  {scrapingProgress && (
+                    <div className="p-4 bg-primary/10 rounded-lg border border-primary/30">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">
+                          {scrapingProgress.status === 'Started' ? 'Analyzing store...' : 'Scraping products...'}
+                        </span>
+                        <span className="text-sm font-bold text-primary">
+                          {scrapingProgress.current}
+                          {scrapingProgress.totalEstimate && `/${scrapingProgress.totalEstimate.toLocaleString()}`}
+                        </span>
+                      </div>
+                      {scrapingProgress.totalEstimate && (
+                        <div className="w-full bg-muted rounded-full h-2 mb-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all duration-300"
+                            style={{
+                              width: `${Math.min((scrapingProgress.current / scrapingProgress.totalEstimate) * 100, 100)}%`
+                            }}
+                          />
+                        </div>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        Store: {scrapingProgress.storeName}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      variant="hero"
+                      className="flex-1"
+                      onClick={handleScrapeEbay}
+                      disabled={!ebayUrl || isScrapingEbay}
+                    >
+                      {isScrapingEbay ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Scraping...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4 mr-2" />
+                          Start Scraping
+                        </>
+                      )}
+                    </Button>
+                    {isScrapingEbay && (
+                      <Button
+                        variant="destructive"
+                        onClick={handleStopScraping}
+                      >
+                        Stop
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
