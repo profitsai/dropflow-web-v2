@@ -12,8 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Zap, Package, TrendingUp, Loader2, AlertCircle, Info, ShoppingCart, CheckCircle2, Box } from "lucide-react"
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-production.up.railway.app';
+import { scrapeEbayStore, matchTitlesToAmazon, importProduct } from "@/lib/api"
 
 export default function Scraper() {
   const [ebayUrl, setEbayUrl] = useState("")
@@ -22,7 +21,14 @@ export default function Scraper() {
   const [isScrapingEbay, setIsScrapingEbay] = useState(false)
   const [isScrapingAmazon, setIsScrapingAmazon] = useState(false)
   const [isScrapingAliexpress, setIsScrapingAliexpress] = useState(false)
-  const [result, setResult] = useState<{ platform: string; count: number; titles: string[] } | null>(null)
+  const [result, setResult] = useState<{
+    platform: string;
+    count: number;
+    titles: string[];
+    matchedUrls?: string[];
+    matchRate?: number;
+    error?: string;
+  } | null>(null)
 
   // Supplier selection dialog state
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
@@ -79,25 +85,51 @@ export default function Scraper() {
     setResult(null)
 
     try {
-      const response = await fetch(`${API_URL}/api/scraper/ebay-store`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          store_url: ebayUrl,
-          max_pages: 50,
-          supplier: selectedSupplier
-        })
-      })
-      const data = await response.json()
-      if (data.titles) {
+      // Step 1: Scrape eBay store for product titles
+      const scrapeResponse = await scrapeEbayStore(ebayUrl, 50)
+
+      if (!scrapeResponse.titles || scrapeResponse.titles.length === 0) {
         setResult({
-          platform: `eBay (${selectedSupplier === 'amazon' ? 'Amazon' : 'AliExpress'} supplier)`,
-          count: data.titles.length,
-          titles: data.titles
+          platform: 'eBay',
+          count: 0,
+          titles: [],
+          error: 'No products found in store'
+        })
+        return
+      }
+
+      // Step 2: If Amazon supplier selected, match titles to Amazon products
+      if (selectedSupplier === 'amazon') {
+        const matchResponse = await matchTitlesToAmazon(scrapeResponse.titles, 'com')
+
+        // Extract Amazon URLs from successful matches
+        const amazonUrls = matchResponse.results
+          .filter(r => r.amazon_url)
+          .map(r => r.amazon_url!)
+
+        setResult({
+          platform: `eBay → Amazon (${matchResponse.match_rate}% match rate)`,
+          count: scrapeResponse.titles.length,
+          titles: scrapeResponse.titles,
+          matchedUrls: amazonUrls,
+          matchRate: matchResponse.match_rate
+        })
+      } else {
+        // AliExpress supplier - just show titles for now
+        setResult({
+          platform: 'eBay → AliExpress',
+          count: scrapeResponse.titles.length,
+          titles: scrapeResponse.titles
         })
       }
     } catch (err) {
-      console.error(err)
+      console.error('eBay scraping error:', err)
+      setResult({
+        platform: 'eBay',
+        count: 0,
+        titles: [],
+        error: err instanceof Error ? err.message : 'Scraping failed'
+      })
     } finally {
       setIsScrapingEbay(false)
     }
@@ -107,18 +139,40 @@ export default function Scraper() {
     if (!amazonUrl) return
     setIsScrapingAmazon(true)
     setResult(null)
-    
+
     try {
-      // Amazon seller scraping - uses import endpoint for now
-      const response = await fetch(`${API_URL}/api/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: amazonUrl })
-      })
-      const data = await response.json()
-      setResult({ platform: 'Amazon', count: 1, titles: [data.product?.name || 'Product scraped'] })
+      const response = await importProduct(amazonUrl)
+
+      if (response.products && response.products.length > 0) {
+        const product = response.products[0]
+        setResult({
+          platform: 'Amazon',
+          count: 1,
+          titles: [product.name || 'Product imported successfully']
+        })
+      } else if (response.errored_urls && response.errored_urls.length > 0) {
+        setResult({
+          platform: 'Amazon',
+          count: 0,
+          titles: [],
+          error: 'Failed to scrape Amazon product. Please check the URL.'
+        })
+      } else {
+        setResult({
+          platform: 'Amazon',
+          count: 0,
+          titles: [],
+          error: 'No product data returned'
+        })
+      }
     } catch (err) {
-      console.error(err)
+      console.error('Amazon scraping error:', err)
+      setResult({
+        platform: 'Amazon',
+        count: 0,
+        titles: [],
+        error: err instanceof Error ? err.message : 'Scraping failed'
+      })
     } finally {
       setIsScrapingAmazon(false)
     }
@@ -145,18 +199,34 @@ export default function Scraper() {
     setResult(null)
 
     try {
-      const response = await fetch(`${API_URL}/api/import`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          url: aliexpressUrl,
-          filters: aliexpressFilters
+      // Note: AliExpress filtering not yet implemented on backend
+      // For now, just attempt to import the URL
+      const response = await importProduct(aliexpressUrl)
+
+      if (response.products && response.products.length > 0) {
+        const product = response.products[0]
+        setResult({
+          platform: 'AliExpress',
+          count: 1,
+          titles: [product.name || 'Product imported successfully'],
+          error: '⚠️ Note: Custom filters not yet supported for AliExpress'
         })
-      })
-      const data = await response.json()
-      setResult({ platform: 'AliExpress', count: 1, titles: [data.product?.name || 'Product scraped'] })
+      } else {
+        setResult({
+          platform: 'AliExpress',
+          count: 0,
+          titles: [],
+          error: 'AliExpress scraping not fully implemented yet. Please use Amazon or eBay for now.'
+        })
+      }
     } catch (err) {
-      console.error(err)
+      console.error('AliExpress scraping error:', err)
+      setResult({
+        platform: 'AliExpress',
+        count: 0,
+        titles: [],
+        error: 'AliExpress scraping not yet supported. Use Amazon or eBay instead.'
+      })
     } finally {
       setIsScrapingAliexpress(false)
     }
@@ -526,21 +596,78 @@ export default function Scraper() {
           {result && (
             <Card className="mb-12">
               <CardContent className="pt-6">
-                <h3 className="font-bold text-lg mb-2">
-                  ✅ Scraped {result.count} products from {result.platform}
-                </h3>
-                <div className="max-h-60 overflow-y-auto bg-muted/30 rounded-lg p-4">
-                  {result.titles.slice(0, 20).map((title, idx) => (
-                    <p key={idx} className="text-sm py-1 border-b border-border/50 last:border-0">
-                      {title}
-                    </p>
-                  ))}
-                  {result.titles.length > 20 && (
-                    <p className="text-sm text-muted-foreground pt-2">
-                      ...and {result.titles.length - 20} more
-                    </p>
-                  )}
-                </div>
+                {result.error ? (
+                  <div className="flex items-center gap-3 p-4 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-bold">Scraping Error</h3>
+                      <p className="text-sm">{result.error}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-green-500" />
+                      Scraped {result.count} products from {result.platform}
+                    </h3>
+
+                    {/* Match Rate Badge */}
+                    {result.matchRate !== undefined && (
+                      <div className="mb-4">
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                          result.matchRate >= 70 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                          result.matchRate >= 40 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                          'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        }`}>
+                          {result.matchRate}% matched to Amazon
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Matched Amazon URLs */}
+                    {result.matchedUrls && result.matchedUrls.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="font-semibold mb-2 flex items-center gap-2">
+                          <Package className="h-4 w-4" />
+                          Matched Amazon Products ({result.matchedUrls.length})
+                        </h4>
+                        <div className="max-h-40 overflow-y-auto bg-green-50 dark:bg-green-900/10 rounded-lg p-4 border border-green-200 dark:border-green-800">
+                          {result.matchedUrls.slice(0, 10).map((url, idx) => (
+                            <a
+                              key={idx}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm py-1 block text-primary hover:underline truncate"
+                            >
+                              {url}
+                            </a>
+                          ))}
+                          {result.matchedUrls.length > 10 && (
+                            <p className="text-sm text-muted-foreground pt-2">
+                              ...and {result.matchedUrls.length - 10} more
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Product Titles */}
+                    <h4 className="font-semibold mb-2">All Scraped Titles</h4>
+                    <div className="max-h-60 overflow-y-auto bg-muted/30 rounded-lg p-4">
+                      {result.titles.slice(0, 20).map((title, idx) => (
+                        <p key={idx} className="text-sm py-1 border-b border-border/50 last:border-0">
+                          {title}
+                        </p>
+                      ))}
+                      {result.titles.length > 20 && (
+                        <p className="text-sm text-muted-foreground pt-2">
+                          ...and {result.titles.length - 20} more
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}

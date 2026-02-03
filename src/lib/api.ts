@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-production.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://dropflow-api-v2-production.up.railway.app';
 
 export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -8,11 +8,12 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
       ...options?.headers,
     },
   });
-  
+
   if (!response.ok) {
-    throw new Error(`API error: ${response.status}`);
+    const errorText = await response.text();
+    throw new Error(`API error: ${response.status} - ${errorText}`);
   }
-  
+
   return response.json();
 }
 
@@ -22,9 +23,44 @@ export async function getProducts() {
 }
 
 export async function importProduct(url: string) {
-  return fetchApi<{ success: boolean; product?: Product; error?: string }>('/api/import', {
+  return fetchApi<{
+    products: Product[];
+    errored_urls: string[];
+    out_of_stock_urls: string[];
+    message: string;
+  }>('/api/import', {
     method: 'POST',
-    body: JSON.stringify({ url }),
+    body: JSON.stringify({ urls: [url] }),
+  });
+}
+
+// Scraper
+export async function scrapeEbayStore(storeUrl: string, maxPages: number = 50) {
+  return fetchApi<{
+    store_name: string;
+    total_items: number;
+    titles: string[];
+    message: string;
+  }>('/api/scraper/ebay-store', {
+    method: 'POST',
+    body: JSON.stringify({ store_url: storeUrl, max_pages: maxPages }),
+  });
+}
+
+export async function matchTitlesToAmazon(titles: string[], domain: string = 'com') {
+  return fetchApi<{
+    results: Array<{
+      ebay_title: string;
+      amazon_url?: string;
+      amazon_title?: string;
+      similarity?: number;
+    }>;
+    total: number;
+    matched: number;
+    match_rate: number;
+  }>('/api/scraper/match-amazon', {
+    method: 'POST',
+    body: JSON.stringify({ titles, domain }),
   });
 }
 

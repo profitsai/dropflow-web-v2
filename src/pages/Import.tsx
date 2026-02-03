@@ -23,24 +23,34 @@ export default function Import() {
     if (!url) return
     setIsImporting(true)
     setResult(null)
-    
+
     try {
       const response = await importProduct(url)
-      if (response.success && response.product) {
-        setResult({ success: true, message: `Successfully imported: ${response.product.name}` })
+
+      if (response.products && response.products.length > 0) {
+        const product = response.products[0]
+        let message = `Successfully imported: ${product.name || 'Product'}`
+
+        if (response.out_of_stock_urls.length > 0) {
+          message += ' (Out of stock - not listed to eBay)'
+        }
+
+        setResult({ success: true, message })
         setRecentImports(prev => [{
           id: Date.now(),
-          name: response.product!.name,
+          name: product.name || 'Unknown Product',
           source: url.includes('amazon') ? 'Amazon' : 'AliExpress',
           status: 'success',
           date: 'Just now'
         }, ...prev.slice(0, 4)])
         setUrl("")
+      } else if (response.errored_urls && response.errored_urls.length > 0) {
+        setResult({ success: false, message: 'Failed to import product. Please check the URL and try again.' })
       } else {
-        setResult({ success: false, message: response.error || 'Failed to import product' })
+        setResult({ success: false, message: response.message || 'Import failed' })
       }
     } catch (err) {
-      setResult({ success: false, message: err instanceof Error ? err.message : 'Import failed' })
+      setResult({ success: false, message: err instanceof Error ? err.message : 'Import failed. Please try again.' })
     } finally {
       setIsImporting(false)
     }
