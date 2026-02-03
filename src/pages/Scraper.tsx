@@ -611,36 +611,36 @@ export default function Scraper() {
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-primary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <div className="relative p-6 bg-gradient-to-br from-blue-500/5 to-blue-600/10 dark:from-blue-500/10 dark:to-blue-600/20 rounded-xl border-2 border-blue-500/20 hover:border-blue-500/50 transition-all duration-300 backdrop-blur-sm">
+                  <div className="relative p-6 bg-gradient-to-br from-blue-500/20 to-blue-600/30 dark:from-blue-500/30 dark:to-blue-600/40 rounded-xl border-2 border-blue-500/30 hover:border-blue-500/60 transition-all duration-300">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-4 shadow-lg shadow-blue-500/30">
                       <span className="text-3xl font-bold text-white">1</span>
                     </div>
                     <h4 className="font-bold text-xl mb-3">Enter Store URL</h4>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-foreground/80 leading-relaxed">
                       Paste the eBay or Amazon store URL you want to scrape
                     </p>
                   </div>
                 </div>
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <div className="relative p-6 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl border-2 border-primary/20 hover:border-primary/50 transition-all duration-300 backdrop-blur-sm">
+                  <div className="relative p-6 bg-gradient-to-br from-primary/20 to-primary/30 dark:from-primary/30 dark:to-primary/40 rounded-xl border-2 border-primary/30 hover:border-primary/60 transition-all duration-300">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
                       <span className="text-3xl font-bold text-white">2</span>
                     </div>
                     <h4 className="font-bold text-xl mb-3">Bot Scrapes Products</h4>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-foreground/80 leading-relaxed">
                       Our bot automatically extracts all product links from the store
                     </p>
                   </div>
                 </div>
                 <div className="relative group">
                   <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-green-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <div className="relative p-6 bg-gradient-to-br from-green-500/5 to-green-600/10 dark:from-green-500/10 dark:to-green-600/20 rounded-xl border-2 border-green-500/20 hover:border-green-500/50 transition-all duration-300 backdrop-blur-sm">
+                  <div className="relative p-6 bg-gradient-to-br from-green-500/20 to-green-600/30 dark:from-green-500/30 dark:to-green-600/40 rounded-xl border-2 border-green-500/30 hover:border-green-500/60 transition-all duration-300">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center mb-4 shadow-lg shadow-green-500/30">
                       <span className="text-3xl font-bold text-white">3</span>
                     </div>
                     <h4 className="font-bold text-xl mb-3">Import & Filter</h4>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-foreground/80 leading-relaxed">
                       Upload the list to Import section and apply your filter requirements
                     </p>
                   </div>
