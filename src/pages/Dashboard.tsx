@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, Package, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, Users, Brain, Code, Shield } from "lucide-react"
+import { DollarSign, Package, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react"
 
 const stats = [
   {
@@ -48,36 +48,30 @@ const topProducts = [
   { name: "Phone Case Premium", sales: 142, revenue: "$3,550" },
 ]
 
-const agents = [
+const systemHealth = [
   {
-    name: "Pyrite",
-    role: "Squad Leader",
-    session: "agent:main:main",
-    icon: Shield,
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-    description: "The coordinator. Direct line to Siam. Delegates, tracks progress, handles anything that doesn't fit elsewhere.",
-    personality: "Strategic thinker. Keeps the big picture in view. Delegates effectively. Makes final decisions.",
-    expertise: ["Coordination", "Decision Making", "Task Delegation", "Progress Tracking"]
+    name: "eBay Store",
+    status: "healthy",
+    description: "All listings active and synchronized",
+    lastSync: "2 minutes ago",
+    icon: CheckCircle2,
+    color: "text-green-500"
   },
   {
-    name: "Sage",
-    role: "Dropshipping Expert",
-    session: "agent:dropshipping:main",
-    icon: Brain,
-    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-    description: "Owns dropshipping operations. AutoDS, warmups, orders, inventory. The eyes on the operation.",
-    personality: "Vigilant. Methodical. Calm under pressure. Numbers-focused. Nothing slips past.",
-    expertise: ["AutoDS Monitoring", "Amazon Warmups", "Order Fulfillment", "Inventory Health", "eBay Account Management"]
+    name: "Price Monitor",
+    status: "healthy",
+    description: "Tracking 1,234 products across suppliers",
+    lastSync: "5 minutes ago",
+    icon: CheckCircle2,
+    color: "text-green-500"
   },
   {
-    name: "Eli",
-    role: "SaaS Builder",
-    session: "agent:saas:main",
-    icon: Code,
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-    description: "Owns DropFlow development. Features, UI/UX, deployment. Code is poetry.",
-    personality: "Clean coder. Systematic thinker. Tests everything. Documents thoroughly.",
-    expertise: ["React/Flask Development", "API Design", "Database Architecture", "Deployment", "UI/UX"]
+    name: "Order Automation",
+    status: "attention",
+    description: "3 orders pending manual review",
+    lastSync: "10 minutes ago",
+    icon: AlertCircle,
+    color: "text-yellow-500"
   }
 ]
 
@@ -91,68 +85,35 @@ export default function Dashboard() {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <Users className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">Mission Control</h1>
+              <BarChart3 className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold">Business Overview</h1>
             </div>
-            <p className="text-muted-foreground">Your AI agent squad. Three specialized agents working together like a real team.</p>
+            <p className="text-muted-foreground">Monitor your dropshipping business performance and operations</p>
           </div>
 
-          {/* Agent Squad Section */}
+          {/* System Health Section */}
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-4">The Squad</h2>
+            <h2 className="text-xl font-semibold mb-4">System Status</h2>
             <div className="grid gap-4 md:grid-cols-3">
-              {agents.map((agent) => {
-                const Icon = agent.icon
+              {systemHealth.map((system) => {
+                const Icon = system.icon
                 return (
-                  <Card key={agent.name} className="hover:shadow-lg transition-shadow">
+                  <Card key={system.name} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${agent.color}`}>
-                            <Icon className="h-5 w-5" />
-                          </div>
+                          <Icon className={`h-5 w-5 ${system.color}`} />
                           <div>
-                            <CardTitle className="text-lg">{agent.name}</CardTitle>
-                            <CardDescription>{agent.role}</CardDescription>
+                            <CardTitle className="text-lg">{system.name}</CardTitle>
+                            <CardDescription className="text-xs">
+                              Last sync: {system.lastSync}
+                            </CardDescription>
                           </div>
                         </div>
-                        <span className="text-xs font-mono bg-muted px-2 py-1 rounded">
-                          {agent.session}
-                        </span>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">{agent.description}</p>
-                        <div className="flex items-center gap-1 text-xs">
-                          <span className="font-medium">Personality:</span>
-                          <span className="text-muted-foreground">{agent.personality}</span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-sm font-medium mb-1">Expertise</div>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.expertise.map((skill) => (
-                            <span 
-                              key={skill} 
-                              className="text-xs px-2 py-1 bg-muted rounded-md"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Status</span>
-                          <span className="flex items-center gap-1">
-                            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="font-medium">Active</span>
-                          </span>
-                        </div>
-                      </div>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground">{system.description}</p>
                     </CardContent>
                   </Card>
                 )
