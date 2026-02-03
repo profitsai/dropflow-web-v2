@@ -1,37 +1,106 @@
+import { useState } from "react"
 import { Navbar } from "@/components/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { DollarSign, Package, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react"
+import { DollarSign, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, BarChart3, AlertCircle, CheckCircle2 } from "lucide-react"
 
-const stats = [
-  {
-    title: "Total Revenue",
-    value: "$12,450.00",
-    change: "+12.5%",
-    trend: "up",
-    icon: DollarSign,
-  },
-  {
-    title: "Products Listed",
-    value: "1,234",
-    change: "+8.2%",
-    trend: "up",
-    icon: Package,
-  },
-  {
-    title: "Orders Today",
-    value: "89",
-    change: "+23.1%",
-    trend: "up",
-    icon: ShoppingCart,
-  },
-  {
-    title: "Profit Margin",
-    value: "24.5%",
-    change: "-2.3%",
-    trend: "down",
-    icon: TrendingUp,
-  },
-]
+const getStatsForPeriod = (period: string) => {
+  // In a real app, this would fetch data from API based on period
+  const statsData: Record<string, any[]> = {
+    daily: [
+      {
+        title: "Daily Revenue",
+        value: "$2,450.00",
+        change: "+12.5%",
+        trend: "up",
+        icon: DollarSign,
+      },
+      {
+        title: "Daily Profit",
+        value: "$892.00",
+        change: "+15.3%",
+        trend: "up",
+        icon: TrendingUp,
+      },
+      {
+        title: "Orders Today",
+        value: "89",
+        change: "+23.1%",
+        trend: "up",
+        icon: ShoppingCart,
+      },
+    ],
+    "3days": [
+      {
+        title: "3-Day Revenue",
+        value: "$7,850.00",
+        change: "+10.2%",
+        trend: "up",
+        icon: DollarSign,
+      },
+      {
+        title: "3-Day Profit",
+        value: "$2,756.00",
+        change: "+12.8%",
+        trend: "up",
+        icon: TrendingUp,
+      },
+      {
+        title: "Orders (3 Days)",
+        value: "267",
+        change: "+18.5%",
+        trend: "up",
+        icon: ShoppingCart,
+      },
+    ],
+    "7days": [
+      {
+        title: "7-Day Revenue",
+        value: "$18,340.00",
+        change: "+14.7%",
+        trend: "up",
+        icon: DollarSign,
+      },
+      {
+        title: "7-Day Profit",
+        value: "$6,419.00",
+        change: "+16.2%",
+        trend: "up",
+        icon: TrendingUp,
+      },
+      {
+        title: "Orders (7 Days)",
+        value: "623",
+        change: "+21.3%",
+        trend: "up",
+        icon: ShoppingCart,
+      },
+    ],
+    "30days": [
+      {
+        title: "30-Day Revenue",
+        value: "$73,500.00",
+        change: "+8.9%",
+        trend: "up",
+        icon: DollarSign,
+      },
+      {
+        title: "30-Day Profit",
+        value: "$25,725.00",
+        change: "+11.4%",
+        trend: "up",
+        icon: TrendingUp,
+      },
+      {
+        title: "Orders (30 Days)",
+        value: "2,670",
+        change: "+15.8%",
+        trend: "up",
+        icon: ShoppingCart,
+      },
+    ],
+  }
+  return statsData[period] || statsData.daily
+}
 
 const recentOrders = [
   { id: "ORD-001", product: "Wireless Earbuds Pro", customer: "John D.", status: "Shipped", amount: "$79.99" },
@@ -76,19 +145,70 @@ const systemHealth = [
 ]
 
 export default function Dashboard() {
+  const [timePeriod, setTimePeriod] = useState("daily")
+  const stats = getStatsForPeriod(timePeriod)
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="pt-20 pb-8 px-4">
         <div className="container mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <BarChart3 className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">Business Overview</h1>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <BarChart3 className="h-8 w-8 text-primary" />
+                  <h1 className="text-3xl font-bold">Business Overview</h1>
+                </div>
+                <p className="text-muted-foreground">Monitor your dropshipping business performance and operations</p>
+              </div>
+
+              {/* Time Period Selector */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setTimePeriod("daily")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    timePeriod === "daily"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  Daily
+                </button>
+                <button
+                  onClick={() => setTimePeriod("3days")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    timePeriod === "3days"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  Last 3 Days
+                </button>
+                <button
+                  onClick={() => setTimePeriod("7days")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    timePeriod === "7days"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  Last 7 Days
+                </button>
+                <button
+                  onClick={() => setTimePeriod("30days")}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    timePeriod === "30days"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  Last 30 Days
+                </button>
+              </div>
             </div>
-            <p className="text-muted-foreground">Monitor your dropshipping business performance and operations</p>
           </div>
 
           {/* System Health Section */}
@@ -122,7 +242,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
             {stats.map((stat) => {
               const Icon = stat.icon
               return (
