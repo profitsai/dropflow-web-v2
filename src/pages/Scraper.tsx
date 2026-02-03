@@ -39,6 +39,9 @@ export default function Scraper() {
   } | null>(null)
   const [abortController, setAbortController] = useState<AbortController | null>(null)
 
+  // Live scraped links
+  const [liveScrapedLinks, setLiveScrapedLinks] = useState<string[]>([])
+
   // Supplier selection dialog state
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
   const [selectedSupplier, setSelectedSupplier] = useState<'amazon' | 'aliexpress' | null>(null)
@@ -93,6 +96,7 @@ export default function Scraper() {
     setIsScrapingEbay(true)
     setResult(null)
     setScrapingProgress(null)
+    setLiveScrapedLinks([]) // Clear previous links
 
     const controller = new AbortController()
     setAbortController(controller)
@@ -142,6 +146,11 @@ export default function Scraper() {
                 status: 'Scraping',
                 storeName: prev?.storeName || ''
               }))
+
+              // Add new titles to live feed
+              if (data.new_titles && Array.isArray(data.new_titles)) {
+                setLiveScrapedLinks(prev => [...prev, ...data.new_titles])
+              }
             } else if (data.done) {
               scrapedTitles = data.titles || []
               setScrapingProgress(null)
@@ -474,10 +483,10 @@ export default function Scraper() {
             </DialogContent>
           </Dialog>
 
-          {/* Scraper Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            {/* eBay Card */}
-            <Card className="hover:shadow-lg transition-shadow border-primary/50">
+          {/* Scraper Cards - Full Width Stacked */}
+          <div className="space-y-8 mb-12 max-w-5xl mx-auto">
+            {/* eBay Card - Full Width with Live Feed */}
+            <Card className="hover:shadow-2xl transition-all duration-300 border-2 border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-transparent">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
@@ -559,10 +568,33 @@ export default function Scraper() {
                         </div>
                       )}
                       {scrapingProgress?.storeName && (
-                        <p className="text-xs text-muted-foreground mb-2">
+                        <p className="text-xs text-muted-foreground mb-3">
                           📦 Store: {scrapingProgress.storeName}
                         </p>
                       )}
+
+                      {/* Live Scraped Links Feed */}
+                      {liveScrapedLinks.length > 0 && (
+                        <div className="mb-4 p-3 bg-background/50 rounded-lg border border-primary/20">
+                          <div className="flex items-center gap-2 mb-2">
+                            <CheckCircle2 className="h-4 w-4 text-green-500" />
+                            <span className="text-sm font-semibold">Live Product Feed</span>
+                            <span className="text-xs text-muted-foreground">({liveScrapedLinks.length} found)</span>
+                          </div>
+                          <div className="max-h-48 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-primary/20">
+                            {liveScrapedLinks.slice(-15).reverse().map((title, idx) => (
+                              <div
+                                key={idx}
+                                className="text-xs p-2 bg-green-500/10 border border-green-500/20 rounded animate-fadeIn flex items-start gap-2"
+                              >
+                                <Package className="h-3 w-3 mt-0.5 text-green-600 flex-shrink-0" />
+                                <span className="line-clamp-2">{title}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Large Stop Button */}
                       <Button
                         variant="destructive"
@@ -592,8 +624,8 @@ export default function Scraper() {
               </CardContent>
             </Card>
 
-            {/* Amazon Card */}
-            <Card className="hover:shadow-lg transition-shadow">
+            {/* Amazon Card - Full Width */}
+            <Card className="hover:shadow-2xl transition-all duration-300 border-2 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
@@ -645,8 +677,8 @@ export default function Scraper() {
               </CardContent>
             </Card>
 
-            {/* AliExpress Card */}
-            <Card className="hover:shadow-lg transition-shadow">
+            {/* AliExpress Card - Full Width */}
+            <Card className="hover:shadow-2xl transition-all duration-300 border-2 border-red-500/30 bg-gradient-to-br from-red-500/5 to-transparent">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
