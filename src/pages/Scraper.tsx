@@ -28,6 +28,14 @@ export default function Scraper() {
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
   const [selectedSupplier, setSelectedSupplier] = useState<'amazon' | 'aliexpress' | null>(null)
 
+  // AliExpress filters dialog state
+  const [showAliexpressFilters, setShowAliexpressFilters] = useState(false)
+  const [aliexpressFilters, setAliexpressFilters] = useState({
+    minOrderAmount: '',
+    minStarRating: '4',
+    keywords: ''
+  })
+
   function handleEbayUrlChange(url: string) {
     setEbayUrl(url)
     // Show supplier dialog when URL is pasted and looks like an eBay store URL
@@ -99,16 +107,34 @@ export default function Scraper() {
     }
   }
 
+  function handleAliexpressUrlChange(url: string) {
+    setAliexpressUrl(url)
+    // Show filters dialog when URL is pasted and looks like an AliExpress store URL
+    if (url.includes('aliexpress.com') && url.length > 20) {
+      setShowAliexpressFilters(true)
+    }
+  }
+
   async function handleScrapeAliexpress() {
     if (!aliexpressUrl) return
+
+    // Show filters dialog if not configured
+    if (!aliexpressFilters.keywords && !aliexpressFilters.minOrderAmount) {
+      setShowAliexpressFilters(true)
+      return
+    }
+
     setIsScrapingAliexpress(true)
     setResult(null)
-    
+
     try {
       const response = await fetch(`${API_URL}/api/import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: aliexpressUrl })
+        body: JSON.stringify({
+          url: aliexpressUrl,
+          filters: aliexpressFilters
+        })
       })
       const data = await response.json()
       setResult({ platform: 'AliExpress', count: 1, titles: [data.product?.name || 'Product scraped'] })
@@ -195,6 +221,95 @@ export default function Scraper() {
             </DialogContent>
           </Dialog>
 
+          {/* AliExpress Filters Dialog */}
+          <Dialog open={showAliexpressFilters} onOpenChange={setShowAliexpressFilters}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Search Filters
+                </DialogTitle>
+                <DialogDescription>
+                  Set your criteria to find the best products from this AliExpress store
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="minOrders">Minimum Order Amount</Label>
+                  <Input
+                    id="minOrders"
+                    type="number"
+                    placeholder="e.g., 100"
+                    value={aliexpressFilters.minOrderAmount}
+                    onChange={(e) => setAliexpressFilters({ ...aliexpressFilters, minOrderAmount: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Filter products by minimum number of orders (indicates popularity)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="minRating">Minimum Star Rating</Label>
+                  <select
+                    id="minRating"
+                    value={aliexpressFilters.minStarRating}
+                    onChange={(e) => setAliexpressFilters({ ...aliexpressFilters, minStarRating: e.target.value })}
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+                  >
+                    <option value="3">3+ Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="4.5">4.5+ Stars</option>
+                    <option value="5">5 Stars Only</option>
+                  </select>
+                  <p className="text-xs text-muted-foreground">
+                    Only show products with high customer ratings
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="keywords">Keywords (Optional)</Label>
+                  <Input
+                    id="keywords"
+                    placeholder="e.g., wireless, waterproof"
+                    value={aliexpressFilters.keywords}
+                    onChange={(e) => setAliexpressFilters({ ...aliexpressFilters, keywords: e.target.value })}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Filter products containing specific keywords in title or description
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setAliexpressFilters({ minOrderAmount: '', minStarRating: '4', keywords: '' })
+                    setShowAliexpressFilters(false)
+                  }}
+                >
+                  Clear Filters
+                </Button>
+                <Button
+                  variant="hero"
+                  className="flex-1"
+                  onClick={() => setShowAliexpressFilters(false)}
+                >
+                  Apply Filters
+                </Button>
+              </div>
+
+              <div className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                <Info className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <p>
+                  These filters help you find winning products with proven sales and quality.
+                </p>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           {/* Scraper Cards */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             {/* eBay Card */}
@@ -271,29 +386,38 @@ export default function Scraper() {
             </Card>
 
             {/* Amazon Card */}
-            <Card className="hover:shadow-lg transition-shadow border-primary/50">
+            <Card className="hover:shadow-lg transition-shadow">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
                     <Package className="h-5 w-5 text-orange-600" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-bold">Amazon</h3>
                     <p className="text-sm text-muted-foreground">Scrape Amazon seller products</p>
                   </div>
                 </div>
-                
+
+                {/* Important Notice */}
+                <div className="mb-4 flex items-start gap-2 text-xs bg-orange-50 dark:bg-orange-900/20 text-orange-900 dark:text-orange-200 p-3 rounded-lg border border-orange-200 dark:border-orange-800">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-semibold mb-1">URL Requirements:</div>
+                    <p>Use an Amazon store URL or SRS (Seller Rating System) link to scrape all products from a specific seller.</p>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Seller URL</Label>
+                    <Label>Store or SRS URL</Label>
                     <Input
                       placeholder="https://www.amazon.com/s?seller=..."
                       value={amazonUrl}
                       onChange={(e) => setAmazonUrl(e.target.value)}
                     />
                   </div>
-                  <Button 
-                    variant="hero" 
+                  <Button
+                    variant="hero"
                     className="w-full"
                     onClick={handleScrapeAmazon}
                     disabled={!amazonUrl || isScrapingAmazon}
@@ -321,23 +445,45 @@ export default function Scraper() {
                   <div className="w-10 h-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                     <Package className="h-5 w-5 text-red-600" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <h3 className="font-bold">AliExpress</h3>
                     <p className="text-sm text-muted-foreground">Scrape AliExpress store products</p>
                   </div>
                 </div>
-                
+
+                {/* Important Notice */}
+                <div className="mb-4 flex items-start gap-2 text-xs bg-red-50 dark:bg-red-900/20 text-red-900 dark:text-red-200 p-3 rounded-lg border border-red-200 dark:border-red-800">
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <div className="font-semibold mb-1">Search Criteria Required:</div>
+                    <p>Enter a store URL and set your filters (minimum orders, ratings, keywords) to find the best products.</p>
+                  </div>
+                </div>
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label>Store URL</Label>
                     <Input
                       placeholder="https://www.aliexpress.com/store/..."
                       value={aliexpressUrl}
-                      onChange={(e) => setAliexpressUrl(e.target.value)}
+                      onChange={(e) => handleAliexpressUrlChange(e.target.value)}
                     />
+                    {(aliexpressFilters.keywords || aliexpressFilters.minOrderAmount) && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          Filters applied
+                        </span>
+                        <button
+                          onClick={() => setShowAliexpressFilters(true)}
+                          className="text-primary hover:underline"
+                        >
+                          Edit filters
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <Button 
-                    variant="hero" 
+                  <Button
+                    variant="hero"
                     className="w-full"
                     onClick={handleScrapeAliexpress}
                     disabled={!aliexpressUrl || isScrapingAliexpress}
