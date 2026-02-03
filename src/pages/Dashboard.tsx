@@ -144,9 +144,20 @@ const systemHealth = [
   }
 ]
 
+const getComparisonText = (period: string) => {
+  const comparisonTexts: Record<string, string> = {
+    daily: "from yesterday",
+    "3days": "from prior 3 days",
+    "7days": "from prior 7 days",
+    "30days": "from last month"
+  }
+  return comparisonTexts[period] || "from yesterday"
+}
+
 export default function Dashboard() {
   const [timePeriod, setTimePeriod] = useState("daily")
   const stats = getStatsForPeriod(timePeriod)
+  const comparisonText = getComparisonText(timePeriod)
 
   return (
     <div className="min-h-screen bg-background">
@@ -263,7 +274,7 @@ export default function Dashboard() {
                       ) : (
                         <ArrowDownRight className="h-4 w-4 mr-1" />
                       )}
-                      {stat.change} from last month
+                      {stat.change} {comparisonText}
                     </div>
                   </CardContent>
                 </Card>
