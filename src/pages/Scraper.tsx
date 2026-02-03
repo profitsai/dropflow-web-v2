@@ -557,12 +557,12 @@ export default function Scraper() {
                 </div>
                 <div className="space-y-3 text-muted-foreground">
                   <p>
-                    Simply paste any eBay or Amazon store URL, and our intelligent bot will automatically
-                    scrape every single product from that store.
+                    Simply paste any eBay competitor store, or Amazon/AliExpress store URL, and our intelligent bot will automatically
+                    scrape products from that store ready to list.
                   </p>
                   <p>
                     You'll receive a comprehensive list of product links that can be directly uploaded to
-                    our Import section for quick filtering and cataloging.
+                    the Import section for to be reviewed and listed directly to your store.
                   </p>
                 </div>
               </CardContent>
@@ -622,9 +622,9 @@ export default function Scraper() {
                   </div>
                 </div>
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                  <div className="relative p-6 bg-gradient-to-br from-primary/20 to-primary/30 dark:from-primary/30 dark:to-primary/40 rounded-xl border-2 border-primary/30 hover:border-primary/60 transition-all duration-300">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-4 shadow-lg shadow-primary/30">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                  <div className="relative p-6 bg-gradient-to-br from-purple-500/20 to-purple-600/30 dark:from-purple-500/30 dark:to-purple-600/40 rounded-xl border-2 border-purple-500/30 hover:border-purple-500/60 transition-all duration-300">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-purple-500/30">
                       <span className="text-3xl font-bold text-white">2</span>
                     </div>
                     <h4 className="font-bold text-xl mb-3">Bot Scrapes Products</h4>
